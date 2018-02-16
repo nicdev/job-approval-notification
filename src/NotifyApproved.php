@@ -60,35 +60,27 @@ class NotifyApproved
         $jobDescription = strlen($jobMeta['_job_description'][0]) > 200 ? substr($jobMeta['_job_description'][0], 0, 197) . '...' : $jobMeta['_job_description'][0];
 
         $messageData = [
-            //'attachment' => [
-                'pretext' => "New {$jobType} Job Posting!",
-                'fallback' => "New {$jobType} Job Posting!",
-                'title' => $job->post_title,
-                'title_link' => get_permalink($postId),
-                'text' => $jobDescription,
-                'color' => '#36a64f',
-                'thumb_url' => isset($jobMeta['_thumbnail_id']) ? wp_get_attachment_url($jobMeta['_thumbnail_id']) : '',
-                'fields' => [
-                    [
-                        'title' => 'Company',
-                        'value' => $jobMeta['_company_name'][0],
-                        'short' => 'true'
-                    ],
-                    [
-                        'title' => 'Location',
-                        'value' => $jobMeta['_job_location'][0],
-                        'short' => 'true'
-                    ]
+            'pretext' => "New {$jobType} Job Posting!",
+            'fallback' => "New {$jobType} Job Posting!",
+            'title' => $job->post_title,
+            'title_link' => get_permalink($postId),
+            'text' => $jobDescription,
+            'color' => '#36a64f',
+            'thumb_url' => isset($jobMeta['_thumbnail_id']) ? wp_get_attachment_url($jobMeta['_thumbnail_id']) : '',
+            'fields' => [
+                [
+                    'title' => 'Company',
+                    'value' => $jobMeta['_company_name'][0],
+                    'short' => 'true'
+                ],
+                [
+                    'title' => 'Location',
+                    'value' => $jobMeta['_job_location'][0],
+                    'short' => 'true'
                 ]
-            //],
+            ]
         ];
 
-        error_log($jobMeta['_thumbnail_id']);
-        //
-        // error_log($jobDescription);
-        // echo '<pre>';
-        // var_dump($messageData);
-        // die();
         return $messageData;
 
     }
