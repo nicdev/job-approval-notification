@@ -39,7 +39,8 @@ class NotifyApproved
             // @TODO give the plugin a config page for the hook, and other things
             $slackClient = new SlackClient('https://hooks.slack.com/services/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');
             $messageData = self::composeMessage($meta->post_id);
-            $slackClient->to('#general')->attach($messageData)->send();
+            $messageChannel = self::channelMatcher(wp_get_post_terms($meta->post_id, 'job_listing_type')[0]->slug);
+            $slackClient->to($messageChannel)->attach($messageData)->send();
         }
     }
 
@@ -57,14 +58,13 @@ class NotifyApproved
         $job = get_post($postId);
         $jobMeta = get_post_meta($postId);
         $jobType = wp_get_post_terms($postId, 'job_listing_type')[0]->name;
-        $jobDescription = strlen($jobMeta['_job_description'][0]) > 200 ? substr($jobMeta['_job_description'][0], 0, 197) . '...' : $jobMeta['_job_description'][0];
 
         $messageData = [
             'pretext' => "New {$jobType} Job Posting!",
             'fallback' => "New {$jobType} Job Posting!",
             'title' => $job->post_title,
             'title_link' => get_permalink($postId),
-            'text' => $jobDescription,
+            'text' => self::descriptionFormatter($jobMeta['_job_description'][0]),
             'color' => '#36a64f',
             'thumb_url' => isset($jobMeta['_thumbnail_id']) ? wp_get_attachment_url($jobMeta['_thumbnail_id']) : '',
             'fields' => [
@@ -83,5 +83,38 @@ class NotifyApproved
 
         return $messageData;
 
+    }
+
+    /**
+     * Limit description to 200 characters
+     * @method descriptionFormatter
+     * @param  string               $description job description
+     * @return string               Limited description, or original description if under 200 characters
+     */
+
+    protected function descriptionFormatter($description)
+    {
+        return strlen($description) > 200 ? substr($description, 0, 197) . '...' : $description;
+    }
+
+    /**
+     * Selects the channel to submit the message to based on job type
+     * @method channelMatcher
+     * @param  string         $jobTypeSlug slug from _terms table
+     * @return [type]         Channel name, if no match defaults to #general
+     */
+
+
+    protected function channelMatcher($jobTypeSlug)
+    {
+        $jobChannels = [
+            'internship' => '#gigs',
+            'full-time' => '#jobs',
+            'freelance' => '#freelance',
+            'part-time' => '#jobs',
+            'temporary' => '#gigs',
+        ];
+
+        return isset($jobChannels[$jobTypeSlug]) ? $jobChannels[$jobTypeSlug] : '#general';
     }
 }
