@@ -19,8 +19,6 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-require_once WP_PLUGIN_DIR . '/dorzki-notifications-to-slack/slack-notifications.php';
-require_once __DIR__ . '/src/NotifyApproved.php';
+require_once __DIR__ . '/vendor/autoload.php';
 
-register_activation_hook(__FILE__, ['NotifyApproved\NotifyApproved', 'activate']);
 add_action('added_post_meta', ['NotifyApproved\NotifyApproved', 'notify']);

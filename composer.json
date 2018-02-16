@@ -10,5 +10,8 @@
             "name": "Nic Rosental",
             "email": "nic@epiclabs.com"
         }
-    ]
+    ],
+    "autoload": {
+        "psr-4": {"NotifyApproved\\": "src/"}
+    }
 }

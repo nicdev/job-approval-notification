@@ -2,7 +2,9 @@
 
 namespace NotifyApproved;
 
-use SlackNotifications\Slack_Bot as Slackbot;
+//require_once __DIR__ . '/../vendor/autoload.php';
+
+use Maknz\Slack\Client as SlackClient;
 
 class NotifyApproved
 {
@@ -18,11 +20,7 @@ class NotifyApproved
 
     public function activate()
     {
-        if (!is_plugin_active('dorzki-notifications-to-slack/slack-notifications.php')) {
-            die('Slack Notifications by dorzki not installed');
-        }
-
-        return true;
+        // Nothing here for now
     }
 
     /**
@@ -36,10 +34,12 @@ class NotifyApproved
     {
         global $wpdb;
         $meta = $wpdb->get_row("SELECT * FROM {$wpdb->prefix}postmeta WHERE meta_id = {$metaId}");
-        $slackBot = new slackBot;
+
         if ($meta->meta_key === '_job_expires') {
+            // @TODO give the plugin a config page for the hook, and other things
+            $slackClient = new SlackClient('https://hooks.slack.com/services/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');
             $messageData = self::composeMessage($meta->post_id);
-            $slackBot->send_message($messageData['message'], $messageData['attachments'], $messageData['args']);
+            $slackClient->to('#general')->attach($messageData)->send();
         }
     }
 
@@ -57,38 +57,38 @@ class NotifyApproved
         $job = get_post($postId);
         $jobMeta = get_post_meta($postId);
         $jobType = wp_get_post_terms($postId, 'job_listing_type')[0]->name;
+        $jobDescription = strlen($jobMeta['_job_description'][0]) > 200 ? substr($jobMeta['_job_description'][0], 0, 197) . '...' : $jobMeta['_job_description'][0];
 
         $messageData = [
-            'message' => "New {$jobType} Job Posting!",
-            'attachments' => [
-                [
-                    'title' => 'Job Posting',
-                    'value' => '<' . get_permalink($postId) . '|' . $job->post_title . '>',
-                    'short' => 'true'
-                ],
-                [
-                    'title' => 'Company',
-                    'value' => $jobMeta['_company_name'][0],
-                    'short' => 'true'
-                ],
-                [
-                    'title' => 'Location',
-                    'value' => $jobMeta['_job_location'][0],
-                    'short' => 'true'
-                ],
-                [
-                    'title' => 'Description',
-                    'value' => substr($jobMeta['_job_description'][0], 0, 200),
-                    'short' => "false"
+            //'attachment' => [
+                'pretext' => "New {$jobType} Job Posting!",
+                'fallback' => "New {$jobType} Job Posting!",
+                'title' => $job->post_title,
+                'title_link' => get_permalink($postId),
+                'text' => $jobDescription,
+                'color' => '#36a64f',
+                'thumb_url' => isset($jobMeta['_thumbnail_id']) ? wp_get_attachment_url($jobMeta['_thumbnail_id']) : '',
+                'fields' => [
+                    [
+                        'title' => 'Company',
+                        'value' => $jobMeta['_company_name'][0],
+                        'short' => 'true'
+                    ],
+                    [
+                        'title' => 'Location',
+                        'value' => $jobMeta['_job_location'][0],
+                        'short' => 'true'
+                    ]
                 ]
-            ],
-            'args' => [
-                'color'      => '#36a64f',
-                'title'      => $job->post_title,
-                'thumb_url'  => isset($jobMeta['_thumbnail_id']) ? wp_get_attachment_url($jobMeta['_thumbnail_id']) : '',
-            ]
+            //],
         ];
 
+        error_log($jobMeta['_thumbnail_id']);
+        //
+        // error_log($jobDescription);
+        // echo '<pre>';
+        // var_dump($messageData);
+        // die();
         return $messageData;
 
     }
