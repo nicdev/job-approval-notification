@@ -1,4 +1,4 @@
-=== Slack Notifications by dorzki ===
+=== Slack Notifications for Job Posting Approval on Tech404 ===
 Contributors: nicdev
 Tags: notifications, slack
 Requires at least: 4.5
@@ -13,5 +13,3 @@ Notify slack channel when a job has been approved
 == Description ==
 
 Single purpose. Maybe we'll re-use the code for something more broad in the future.
-
-You can contribute by simple [Forking me on GitHub](https://github.com/nicdev/notify-approved).
