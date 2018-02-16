@@ -13,3 +13,11 @@ Notify slack channel when a job has been approved
 ## Description
 
 Single purpose. Maybe we'll re-use the code for something more broad in the future.
+
+## Release Notes
+
+### 0.2.0
+* Configurable Slack webhook
+* Per channel notifications
+* Removes dependency on other plugins
+* Composer autoload, and namespacing

@@ -34,8 +34,8 @@ class NotifyApproved
         $meta = $wpdb->get_row("SELECT * FROM {$wpdb->prefix}postmeta WHERE meta_id = {$metaId}");
 
         if ($meta->meta_key === '_job_expires') {
-            // @TODO give the plugin a config page for the hook, and other things
-            $slackClient = new SlackClient('https://hooks.slack.com/services/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');
+            $slackHook = get_option('tech404_slack_hook');
+            $slackClient = new SlackClient($slackHook);
             $messageData = self::composeMessage($meta->post_id);
             $messageChannel = self::channelMatcher(wp_get_post_terms($meta->post_id, 'job_listing_type')[0]->slug);
             $slackClient->to($messageChannel)->attach($messageData)->send();
@@ -118,7 +118,6 @@ class NotifyApproved
 
     public static function hookMenu()
     {
-        error_log('called hookMenu');
         add_options_page('Jobs Notifier', 'Jobs Notifier', 'install_plugins', 'tech404_jobs_notifier', ['NotifyApproved\NotifyApproved', 'settingsDisplay']);
     }
 
