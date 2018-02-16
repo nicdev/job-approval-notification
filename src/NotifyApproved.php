@@ -2,7 +2,7 @@
 
 namespace NotifyApproved;
 
-use SlackNotifications\Slack_Bot as Slackbot;
+use Maknz\Slack\Client as SlackClient;
 
 class NotifyApproved
 {
@@ -18,11 +18,7 @@ class NotifyApproved
 
     public function activate()
     {
-        if (!is_plugin_active('dorzki-notifications-to-slack/slack-notifications.php')) {
-            die('Slack Notifications by dorzki not installed');
-        }
-
-        return true;
+        // Nothing here for now
     }
 
     /**
@@ -36,10 +32,13 @@ class NotifyApproved
     {
         global $wpdb;
         $meta = $wpdb->get_row("SELECT * FROM {$wpdb->prefix}postmeta WHERE meta_id = {$metaId}");
-        $slackBot = new slackBot;
+
         if ($meta->meta_key === '_job_expires') {
+            $slackHook = get_option('tech404_slack_hook');
+            $slackClient = new SlackClient($slackHook);
             $messageData = self::composeMessage($meta->post_id);
-            $slackBot->send_message($messageData['message'], $messageData['attachments'], $messageData['args']);
+            $messageChannel = self::channelMatcher(wp_get_post_terms($meta->post_id, 'job_listing_type')[0]->slug);
+            $slackClient->to($messageChannel)->attach($messageData)->send();
         }
     }
 
@@ -59,13 +58,14 @@ class NotifyApproved
         $jobType = wp_get_post_terms($postId, 'job_listing_type')[0]->name;
 
         $messageData = [
-            'message' => "New {$jobType} Job Posting!",
-            'attachments' => [
-                [
-                    'title' => 'Job Posting',
-                    'value' => '<' . get_permalink($postId) . '|' . $job->post_title . '>',
-                    'short' => 'true'
-                ],
+            'pretext' => "New {$jobType} Job Posting!",
+            'fallback' => "New {$jobType} Job Posting!",
+            'title' => $job->post_title,
+            'title_link' => get_permalink($postId),
+            'text' => self::descriptionFormatter($jobMeta['_job_description'][0]),
+            'color' => '#36a64f',
+            'thumb_url' => isset($jobMeta['_thumbnail_id']) ? wp_get_attachment_url($jobMeta['_thumbnail_id']) : '',
+            'fields' => [
                 [
                     'title' => 'Company',
                     'value' => $jobMeta['_company_name'][0],
@@ -75,21 +75,54 @@ class NotifyApproved
                     'title' => 'Location',
                     'value' => $jobMeta['_job_location'][0],
                     'short' => 'true'
-                ],
-                [
-                    'title' => 'Description',
-                    'value' => substr($jobMeta['_job_description'][0], 0, 200),
-                    'short' => "false"
                 ]
-            ],
-            'args' => [
-                'color'      => '#36a64f',
-                'title'      => $job->post_title,
-                'thumb_url'  => isset($jobMeta['_thumbnail_id']) ? wp_get_attachment_url($jobMeta['_thumbnail_id']) : '',
             ]
         ];
 
         return $messageData;
 
+    }
+
+    /**
+     * Limit description to 200 characters
+     * @method descriptionFormatter
+     * @param  string               $description job description
+     * @return string               Limited description, or original description if under 200 characters
+     */
+
+    protected function descriptionFormatter($description)
+    {
+        return strlen($description) > 200 ? substr($description, 0, 197) . '...' : $description;
+    }
+
+    /**
+     * Selects the channel to submit the message to based on job type
+     * @method channelMatcher
+     * @param  string         $jobTypeSlug slug from _terms table
+     * @return [type]         Channel name, if no match defaults to #general
+     */
+
+
+    protected function channelMatcher($jobTypeSlug)
+    {
+        $jobChannels = [
+            'internship' => '#gigs',
+            'full-time' => '#jobs',
+            'freelance' => '#freelance',
+            'part-time' => '#jobs',
+            'temporary' => '#gigs',
+        ];
+
+        return isset($jobChannels[$jobTypeSlug]) ? $jobChannels[$jobTypeSlug] : '#general';
+    }
+
+    public static function hookMenu()
+    {
+        add_options_page('Jobs Notifier', 'Jobs Notifier', 'install_plugins', 'tech404_jobs_notifier', ['NotifyApproved\NotifyApproved', 'settingsDisplay']);
+    }
+
+    public static function settingsDisplay()
+    {
+        require_once __DIR__ . '/settingsDisplay.php';
     }
 }
