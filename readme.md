@@ -1,4 +1,4 @@
-=== Slack Notifications for Job Posting Approval on Tech404 ===
+# Slack Notifications for Job Posting Approval on Tech404
 Contributors: nicdev
 Tags: notifications, slack
 Requires at least: 4.5
@@ -10,6 +10,6 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Notify slack channel when a job has been approved
 
-== Description ==
+## Description
 
 Single purpose. Maybe we'll re-use the code for something more broad in the future.
