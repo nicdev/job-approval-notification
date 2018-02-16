@@ -21,4 +21,8 @@ if (!defined('ABSPATH')) {
 
 require_once __DIR__ . '/vendor/autoload.php';
 
+// Hook into the job approval meta update
 add_action('added_post_meta', ['NotifyApproved\NotifyApproved', 'notify']);
+
+// Add a submenu for settings
+add_action('init', ['NotifyApproved\NotifyApproved', 'hookMenu']);

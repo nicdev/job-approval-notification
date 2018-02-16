@@ -2,8 +2,6 @@
 
 namespace NotifyApproved;
 
-//require_once __DIR__ . '/../vendor/autoload.php';
-
 use Maknz\Slack\Client as SlackClient;
 
 class NotifyApproved
@@ -116,5 +114,16 @@ class NotifyApproved
         ];
 
         return isset($jobChannels[$jobTypeSlug]) ? $jobChannels[$jobTypeSlug] : '#general';
+    }
+
+    public static function hookMenu()
+    {
+        error_log('called hookMenu');
+        add_options_page('Jobs Notifier', 'Jobs Notifier', 'install_plugins', 'tech404_jobs_notifier', ['NotifyApproved\NotifyApproved', 'settingsDisplay']);
+    }
+
+    public static function settingsDisplay()
+    {
+        require_once __DIR__ . '/settingsDisplay.php';
     }
 }
