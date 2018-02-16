@@ -1,0 +1,14 @@
+{
+    "name": "nicdev/notifyapproved",
+    "description": "Single purpose WP plugin to post notifications to Slack when a job is approved on the site.",
+    "type": "plugin",
+    "require": {
+        "maknz/slack": "^1.7"
+    },
+    "authors": [
+        {
+            "name": "Nic Rosental",
+            "email": "nic@epiclabs.com"
+        }
+    ]
+}
