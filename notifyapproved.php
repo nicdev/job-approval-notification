@@ -1,11 +1,11 @@
 <?php
 
 /*
- * Plugin Name: Notify Approved
+ * Plugin Name: WP Job Manager Slack Notifications
  * Plugin URI: https://tech404.io
- * Description: Piggy back off of dorzki notifications plugin to send an alert when a job is approved.
+ * Description: Send an alert to Slack when a job is approved.
  * Author: Nic Rosental
- * Version: 0.1
+ * Version: 0.2
  * Author URI: https://github.com/nicdev
  * License: GPL2+
  */
