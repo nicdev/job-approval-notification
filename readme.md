@@ -16,6 +16,10 @@ Single purpose. Maybe we'll re-use the code for something more broad in the futu
 
 ## Release Notes
 
+### 0.2.1
+
+* Updated plugin header for legibility
+
 ### 0.2.0
 * Configurable Slack webhook
 * Per channel notifications
